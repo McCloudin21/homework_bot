@@ -3,12 +3,11 @@ import os
 import time
 
 import requests
-from requests.exceptions import RequestException
 import telegram
+from requests.exceptions import RequestException
 from dotenv import load_dotenv
 
-from exception import (EndpointError,
-                       ResponseFormatError)
+from exception import EndpointError
 
 load_dotenv()
 
@@ -39,27 +38,23 @@ logger = logging.getLogger(__name__)
 
 def check_tokens():
     """Проверка доступности переменных окружения."""
-    for key in (PRACTICUM_TOKEN,
-                TELEGRAM_TOKEN,
-                TELEGRAM_CHAT_ID):
-        if key is None:
-            logger.critical('Глобальные переменные не корректны')
-            return False
-        if not key:
-            logger.critical('Глобальные переменные не найдены')
-            return False
+    if PRACTICUM_TOKEN is None:
+        logger.critical('Переменная PRACTICUM_TOKEN не корректна')
+        return False
+    if TELEGRAM_TOKEN is None:
+        logger.critical('Переменная TELEGRAM_TOKEN не корректна')
+        return False
+    if TELEGRAM_CHAT_ID is None:
+        logger.critical('Переменная TELEGRAM_CHAT_ID не корректна')
+        return False
     return True
 
 
 def send_message(bot, message):
     """Отправка сообщения в Telegram."""
-    try:
-        bot.send_message(chat_id=TELEGRAM_CHAT_ID,
-                         text=message)
-    except telegram.error.TelegramError as error:
-        logger.error(f"Не удалось отправить сообщение - {error}")
-    else:
-        logger.debug(f"Бот отправил сообщение: {message}")
+    bot.send_message(chat_id=TELEGRAM_CHAT_ID,
+                     text=message)
+    logger.debug(f'Бот отправил сообщение: {message}')
 
 
 def get_api_answer(timestamp):
@@ -80,17 +75,14 @@ def get_api_answer(timestamp):
             response_status=response.status_code,
             **all_params,
         ))
-    try:
-        return response.json()
-    except Exception as error:
-        raise ResponseFormatError(FORMAT_NOT_JSON.format(error))
+    return response.json()
 
 
 def check_response(response):
     """Проверка ответа API от эндпоинта."""
     if not isinstance(response,
                       dict):
-        error = f'Неверный тип данных {type(response)}, вместо "dict"'
+        error = 'Неверный тип данных одноразовых переменных'
         raise TypeError(error)
     elif 'homeworks' not in response:
         error = 'В ответе от API отсутствует ключ homeworks'
@@ -99,7 +91,6 @@ def check_response(response):
                         list):
         error = 'Неверный тип данных у элемента homeworks'
         raise TypeError(error)
-    return response.get('homeworks')
 
 
 def parse_status(homework):
@@ -108,9 +99,11 @@ def parse_status(homework):
         homework_name = homework['homework_name']
     except KeyError:
         logger.error('В ответе от API отсутствует ключ homeworks_name')
-    if homework['status'] not in HOMEWORK_VERDICTS:
+        raise Exception('В ответе от API отсутствует ключ homeworks_name')
+    status = homework['status']
+    if status not in HOMEWORK_VERDICTS:
         raise KeyError('Статус домашней работы не распознан')
-    verdict = HOMEWORK_VERDICTS[homework['status']]
+    verdict = HOMEWORK_VERDICTS[status]
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
@@ -126,7 +119,8 @@ def main():
     while True:
         try:
             response = get_api_answer(timestamp)
-            homework = check_response(response)
+            check_response(response)
+            homework = response.get('homeworks')
             if homework:
                 status = parse_status(homework[0])
                 if status != last_status:
@@ -134,8 +128,10 @@ def main():
                     last_status = status
             else:
                 message = 'Статус работы не изменился'
-                send_message(bot, message)
-                logger.info(message)
+                logger.debug(message)
+        except telegram.TelegramError as error:
+            message = f'Не удалось отправить сообщение - {error}'
+            logger.error(message)
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             send_message(bot, message)
