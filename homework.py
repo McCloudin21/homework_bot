@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 
 def check_tokens():
-    """Проверка доступности переменных окружения"""
+    """Проверка доступности переменных окружения."""
     for key in (PRACTICUM_TOKEN,
                 TELEGRAM_TOKEN,
                 TELEGRAM_CHAT_ID):
@@ -103,7 +103,7 @@ def check_response(response):
 
 
 def parse_status(homework):
-    """Извлечение статуса конкретной домашней работы"""
+    """Извлечение статуса конкретной домашней работы."""
     try:
         homework_name = homework['homework_name']
     except KeyError:
