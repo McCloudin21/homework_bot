@@ -52,7 +52,7 @@ def check_tokens():
 
 
 def send_message(bot, message):
-    """Отправка сообщения в Telegram"""
+    """Отправка сообщения в Telegram."""
     try:
         bot.send_message(chat_id=TELEGRAM_CHAT_ID,
                          text=message)
@@ -63,7 +63,7 @@ def send_message(bot, message):
 
 
 def get_api_answer(timestamp):
-    """Запрос к эндпоинту API-сервиса"""
+    """Запрос к эндпоинту API-сервиса."""
     time_params = {'from_date': timestamp}
     all_params = dict(url=ENDPOINT,
                       headers=HEADERS,
@@ -87,7 +87,7 @@ def get_api_answer(timestamp):
 
 
 def check_response(response):
-    """Проверка ответа API от эндпоинта"""
+    """Проверка ответа API от эндпоинта."""
     if not isinstance(response,
                       dict):
         error = f'Неверный тип данных {type(response)}, вместо "dict"'
@@ -103,7 +103,7 @@ def check_response(response):
 
 
 def parse_status(homework):
-    """Извлечение статуса конкретной домашней работы"""
+    """Извлечение статуса конкретной домашней работы."""
     try:
         homework_name = homework['homework_name']
     except KeyError:
