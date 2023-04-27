@@ -3,6 +3,6 @@ class EndpointError(Exception):
     pass
 
 
-class ResponseFormatError(Exception):
-    """Ошибка, если формат response не json."""
+class SendMessageException(Exception):
+    """Ошибка при отправке"""
     pass
