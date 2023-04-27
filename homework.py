@@ -7,7 +7,12 @@ import telegram
 from requests.exceptions import RequestException
 from dotenv import load_dotenv
 
+<<<<<<< HEAD
 from exception import EndpointError
+=======
+from exception import (EndpointError,
+                       SendMessageException)
+>>>>>>> 821c69378206aaf6a7b9ed5356157bc50058258d
 
 load_dotenv()
 
