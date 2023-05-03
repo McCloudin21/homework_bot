@@ -48,7 +48,7 @@ def check_tokens():
     for log, token in VARIABLES.items():
         if not token:
             error += f'Переменная {log} не корректна\n'
-    if error != '':
+    if error:
         logger.critical(error)
         sys.exit()
 
@@ -100,11 +100,11 @@ def parse_status(homework):
     """Извлечение статуса конкретной домашней работы."""
     try:
         homework_name = homework['homework_name']
-        status = homework['status']
     except KeyError:
         error = 'В ответе от API отсутствует ключ homeworks_name'
         logger.error(error)
         raise KeyError(error)
+    status = homework['status']
     if status not in HOMEWORK_VERDICTS:
         error = 'Статус домашней работы не распознан'
         logger.error(error)
@@ -127,7 +127,6 @@ def main():
         if homeworks:
             for homework in homeworks:
                 hw_status = parse_status(homework)
-                print(hw_status)
                 send_message(bot, hw_status)
         else:
             message = 'Статус работы не изменился'
